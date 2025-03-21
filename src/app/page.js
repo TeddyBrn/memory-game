@@ -1,95 +1,101 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import { useEffect, useState } from 'react';
+import Card from '../components/Card';
+import styles from '../styles/page.module.css';
 
-export default function Home() {
+export default function Page() {
+  const deck = [
+    { id: 1, name: 'billiard ball', image: '/billiardball.svg' },
+    { id: 2, name: 'billiard ball', image: '/billiardball.svg' },
+    { id: 3, name: 'bubble tea', image: '/bubbletea.svg' },
+    { id: 4, name: 'bubble tea', image: '/bubbletea.svg' },
+    { id: 5, name: 'cactus', image: '/cactus.svg' },
+    { id: 6, name: 'cactus', image: '/cactus.svg' },
+    { id: 7, name: 'dog', image: '/dog.svg' },
+    { id: 8, name: 'dog', image: '/dog.svg' },
+    { id: 9, name: 'laptop', image: '/laptop.svg' },
+    { id: 10, name: 'laptop', image: '/laptop.svg' },
+    { id: 11, name: 'octopus', image: '/octopus.svg' },
+    { id: 12, name: 'octopus', image: '/octopus.svg' },
+    { id: 13, name: 'strawberry', image: '/strawberry.svg' },
+    { id: 14, name: 'strawberry', image: '/strawberry.svg' },
+    { id: 15, name: 'sunglasses', image: '/sunglasses.svg' },
+    { id: 16, name: 'sunglasses', image: '/sunglasses.svg' }
+  ];
+
+  const [cards, setCards] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [found, setFound] = useState([]);
+
+  const shuffleDeck = () => {
+    setSelected([]);
+    setFound([]);
+
+    setTimeout(() => {
+      const newCards = [...deck];
+
+      for (let i = newCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newCards[i], newCards[j]] = [newCards[j], newCards[i]];
+      }
+
+      setCards(newCards);
+    }, 600);
+  };
+
+  useEffect(() => {
+    shuffleDeck();
+  }, []);
+
+  useEffect(() => {
+    if (found.length === cards.length / 2) {
+      setTimeout(() => shuffleDeck(), 1000);
+    }
+  }, [found]);
+
+  const selectCard = (id) => {
+    const card = cards.find(e => e.id === id);
+
+    if (found.includes(card.name) || selected.length === 2) return;
+
+    if (selected.length === 0) {
+      setSelected([card.id]);
+      return;
+    }
+
+    setSelected([...selected, card.id]);
+
+    const previousCard = cards.find(e => e.id === selected[0]);
+
+    if (previousCard.name === card.name) {
+      setFound([...found, card.name]);
+      setSelected([]);
+    } else {
+      setTimeout(() => setSelected([]), 500);
+    }
+  }
+
+  const cardsToDisplay = cards.map(card => (
+    <Card
+      key={card.id}
+      id={card.id}
+      name={card.name}
+      image={card.image}
+      selectCard={selectCard}
+      selected={selected.includes(card.id)}
+      found={found.includes(card.name)}
+      />))
+
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+      <div className={styles.header}>
+        <h1 className={styles.headerTitle}>Memory Game 🧠</h1>
+        <div className={styles.headerDivider} />
+      </div>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <div className={styles.main}>
+        <div className={styles.grid}>{ cardsToDisplay }</div>
+      </div>
     </div>
   );
 }
